@@ -9,6 +9,7 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:image/image.dart' as imglib;
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:tflite/tflite.dart';
 
@@ -35,7 +36,15 @@ class HardwareSingleton extends ChangeNotifier {
   DateTime lastDetection = DateTime.now();
   Duration timeSinceLastDetection = Duration(seconds: 3);
 
+  Future<void> _requestCameraPermission() async {
+    var status = await Permission.camera.status;
+    if (!status.isGranted) {
+      await Permission.camera.request();
+    }
+  }
+
   void initialiseCamera() async {
+    _requestCameraPermission();
     WidgetsFlutterBinding.ensureInitialized();
     cameras = await availableCameras();
     controller = CameraController(cameras[0], ResolutionPreset.high);
