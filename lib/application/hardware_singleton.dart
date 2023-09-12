@@ -22,7 +22,7 @@ class HardwareSingleton extends ChangeNotifier {
   HardwareSingleton._internal() {
     this.initialiseCamera();
     this.loadModel();
-    pngEncoder = imglib.PngEncoder(level: 0, filter: 0);
+    pngEncoder = imglib.PngEncoder(level: 0, filter: imglib.PngFilter.none);
   }
   // ################  End of singleton logic ##################
 
@@ -75,9 +75,9 @@ class HardwareSingleton extends ChangeNotifier {
     controller.startImageStream((CameraImage image) {
       controller.stopImageStream();
       imglib.Image decodedImage = aVeryGoodCameraImageConverter(image);
-      decodedImage = imglib.copyRotate(decodedImage, 90);
+      decodedImage = imglib.copyRotate(decodedImage, angle: 90);
 
-      statesSingleton.previewImageBytes = pngEncoder.encodeImage(decodedImage);
+      statesSingleton.previewImageBytes = pngEncoder.encode(decodedImage);
       notifyListeners();
     });
     return null;
@@ -102,11 +102,13 @@ class HardwareSingleton extends ChangeNotifier {
     }
     controller.startImageStream((CameraImage img) async {
       timeSinceLastDetection = DateTime.now().difference(lastDetection);
-      if (!StatesSingleton().isDetecting && (timeSinceLastDetection>Duration(seconds: StatesSingleton().delayPeriod.round()))) {
+      if (!StatesSingleton().isDetecting &&
+          (timeSinceLastDetection >
+              Duration(seconds: StatesSingleton().delayPeriod.round()))) {
         lastDetection = DateTime.now();
         StatesSingleton().isDetecting = true;
         Provider.of<GridModel>(context, listen: false).poke();
-        
+
         var recognitions = await runModel(img);
 
         StatesSingleton statesSingleton = StatesSingleton();
@@ -126,56 +128,54 @@ class HardwareSingleton extends ChangeNotifier {
     return null;
   }
 
-  Future<List<dynamic>> runSSD(CameraImage img)async{
+  Future<List<dynamic>> runSSD(CameraImage img) async {
     var recognitions = await Tflite.detectObjectOnFrame(
-          bytesList: img.planes.map((plane) {
-            return plane.bytes;
-          }).toList(), // required
-          model: "SSDMobileNet",
-          imageHeight: img.height,
-          imageWidth: img.width,
-          imageMean: 127.5, // defaults to 127.5
-          imageStd: 127.5, // defaults to 127.5
-          rotation: 90, // defaults to 90, Android only
-          threshold: certaintyThreshold, // defaults to 0.1
-          asynch: true, // defaults to true
-          // numResultsPerClass: 2
-        );
+      bytesList: img.planes.map((plane) {
+        return plane.bytes;
+      }).toList(), // required
+      model: "SSDMobileNet",
+      imageHeight: img.height,
+      imageWidth: img.width,
+      imageMean: 127.5, // defaults to 127.5
+      imageStd: 127.5, // defaults to 127.5
+      rotation: 90, // defaults to 90, Android only
+      threshold: certaintyThreshold, // defaults to 0.1
+      asynch: true, // defaults to true
+      // numResultsPerClass: 2
+    );
     return recognitions;
   }
 
-  Future<List<dynamic>> runYOLO(CameraImage img)async{
-          var recognitions = await Tflite.detectObjectOnFrame(
-            bytesList: img.planes.map((plane) {
-              return plane.bytes;
-            }).toList(), // required
-            model: "YOLO",
-            imageHeight: img.height,
-            imageWidth: img.width,
-            imageMean: 0, // defaults to 127.5
-            imageStd: 255.0, // defaults to 127.5
-            // numResults: 2,        // defaults to 5
-            threshold: 0.1, // defaults to 0.1
-            numResultsPerClass: 2, // defaults to 5
-            // anchors: anchors,     // defaults to [0.57273,0.677385,1.87446,2.06253,3.33843,5.47434,7.88282,3.52778,9.77052,9.16828]
-            blockSize: 32, // defaults to 32
-            numBoxesPerBlock: 5, // defaults to 5
-            asynch: true);
-            return recognitions;
+  Future<List<dynamic>> runYOLO(CameraImage img) async {
+    var recognitions = await Tflite.detectObjectOnFrame(
+        bytesList: img.planes.map((plane) {
+          return plane.bytes;
+        }).toList(), // required
+        model: "YOLO",
+        imageHeight: img.height,
+        imageWidth: img.width,
+        imageMean: 0, // defaults to 127.5
+        imageStd: 255.0, // defaults to 127.5
+        // numResults: 2,        // defaults to 5
+        threshold: 0.1, // defaults to 0.1
+        numResultsPerClass: 2, // defaults to 5
+        // anchors: anchors,     // defaults to [0.57273,0.677385,1.87446,2.06253,3.33843,5.47434,7.88282,3.52778,9.77052,9.16828]
+        blockSize: 32, // defaults to 32
+        numBoxesPerBlock: 5, // defaults to 5
+        asynch: true);
+    return recognitions;
   }
 
   void startReading(context) {
     startReadingImages(context);
   }
 
-  Future<List<dynamic>> runModel(CameraImage img){
-    if(StatesSingleton().selectedModelString=='SSD'){
+  Future<List<dynamic>> runModel(CameraImage img) {
+    if (StatesSingleton().selectedModelString == 'SSD') {
       return runSSD(img);
-    }
-    else if (StatesSingleton().selectedModelString=='YOLO'){
+    } else if (StatesSingleton().selectedModelString == 'YOLO') {
       return runYOLO(img);
-    }
-    else{
+    } else {
       print('Invalid Model Selection String!!');
       throw Error();
     }
@@ -192,7 +192,7 @@ class HardwareSingleton extends ChangeNotifier {
     if (!StatesSingleton().isPlayingWarning) {
       StatesSingleton().isPlayingWarning = true;
       FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
-      await _mPlayer.openAudioSession();
+      await _mPlayer.openPlayer();
       String _mPath = await StatesSingleton().getLocalSoundPath(warningIndex);
       print('playing $_mPath');
       await _mPlayer.startPlayer(
@@ -200,7 +200,7 @@ class HardwareSingleton extends ChangeNotifier {
           codec: Codec.aacADTS,
           whenFinished: () {
             StatesSingleton().isPlayingWarning = false;
-            _mPlayer.closeAudioSession();
+            _mPlayer.closePlayer();
           });
     }
   }

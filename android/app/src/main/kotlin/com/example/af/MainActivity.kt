@@ -1,4 +1,4 @@
-package com.example.couch_defender
+package com.eduardkieser.af
 
 import io.flutter.embedding.android.FlutterActivity
 

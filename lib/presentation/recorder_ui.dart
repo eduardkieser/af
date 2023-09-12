@@ -9,12 +9,12 @@ startRecordingFirstWarning() async {
   StatesSingleton statesSingleton = StatesSingleton();
   print("started");
   FlutterSoundRecorder recorder = FlutterSoundRecorder();
-  recorder.openAudioSession();
+  recorder.openRecorder();
   await recorder.startRecorder(
       toFile: await statesSingleton.localPath + '/1.adts');
   await Future.delayed(const Duration(seconds: 2), () {});
   await recorder.stopRecorder();
-  await recorder.closeAudioSession();
+  await recorder.closeRecorder();
   print('stopped');
 }
 
@@ -24,11 +24,11 @@ playFirstWarning() async {
 
   print("${statesSingleton.localPath}/1.adts}");
 
-  await player.openAudioSession();
+  await player.openPlayer();
   await player.startPlayer(
       fromURI: await statesSingleton.localPath + '/1.adts');
   await player.startPlayer();
-  await player.closeAudioSession();
+  await player.closePlayer();
 }
 
 Widget showRecorderMenue(context) {

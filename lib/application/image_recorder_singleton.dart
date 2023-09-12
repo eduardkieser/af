@@ -12,7 +12,7 @@ class ImageRecorderSingleton {
     return _imageRecorderSingleton;
   }
   ImageRecorderSingleton._internal() {
-    pngEncoder = imglib.PngEncoder(level: 0, filter: 0);
+    pngEncoder = imglib.PngEncoder(level: 0, filter: imglib.PngFilter.none);
     lastImageEntry = DateTime.now();
   }
   // ################  End of singleton logic ##################
@@ -46,9 +46,9 @@ class ImageRecorderSingleton {
     await ensureImagePath();
     String filePath = getImagePath();
     imglib.Image convertedImage = aVeryGoodCameraImageConverter(image);
-    convertedImage = imglib.copyRotate(convertedImage, 90);
+    convertedImage = imglib.copyRotate(convertedImage, angle: 90);
     convertedImage = imglib.copyResize(convertedImage, width: 500);
-    List<int> imageBytes = pngEncoder.encodeImage(convertedImage);
+    List<int> imageBytes = pngEncoder.encode(convertedImage);
     print('saving image to $filePath');
 
     File imageFile = File(filePath);

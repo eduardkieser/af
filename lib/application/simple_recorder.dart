@@ -56,7 +56,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   void initState() {
     // Be careful : openAudioSession return a Future.
     // Do not access your FlutterSoundPlayer or FlutterSoundRecorder before the completion of the Future
-    _mPlayer.openAudioSession().then((value) {
+    _mPlayer.openPlayer().then((value) {
       setState(() {
         _mPlayerIsInited = true;
       });
@@ -72,11 +72,11 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
   @override
   void dispose() {
     stopPlayer();
-    _mPlayer.closeAudioSession();
+    _mPlayer.closePlayer();
     _mPlayer = null;
 
     stopRecorder();
-    _mRecorder.closeAudioSession();
+    _mRecorder.closeRecorder();
     _mRecorder = null;
     if (_mPath != null) {
       var outputFile = File(_mPath);
@@ -98,7 +98,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
     if (outputFile.existsSync()) {
       _mplaybackReady = true;
     }
-    await _mRecorder.openAudioSession();
+    await _mRecorder.openRecorder();
     _mRecorderIsInited = true;
   }
 
@@ -209,10 +209,12 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
             ),
           ),
           child: Row(children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: getRecorderFn(warningIndex),
-              color: Colors.white,
-              disabledColor: Colors.grey,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                disabledBackgroundColor: Colors.grey,
+              ),
               child: Text(_mRecorder.isRecording ? 'Stop' : 'Record'),
             ),
             SizedBox(
@@ -237,10 +239,12 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
             ),
           ),
           child: Row(children: [
-            RaisedButton(
+            ElevatedButton(
               onPressed: getPlaybackFn(warningIndex),
-              color: Colors.white,
-              disabledColor: Colors.grey,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                disabledBackgroundColor: Colors.grey,
+              ),
               child: Text(_mPlayer.isPlaying ? 'Stop' : 'Play'),
             ),
             SizedBox(
@@ -263,7 +267,7 @@ class _SimpleRecorderState extends State<SimpleRecorder> {
           ...buildButtonsFromWarningIndex(0),
           ...buildButtonsFromWarningIndex(1),
           ...buildButtonsFromWarningIndex(2),
-          RaisedButton(
+          ElevatedButton(
             onPressed: (() {
               StatesSingleton().showRecordingUi = false;
               Provider.of<GridModel>(context, listen: false).poke();

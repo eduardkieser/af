@@ -21,13 +21,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: ^0.6.2+1
-  tflite: ^1.1.1
-  image: ^2.1.19
-  provider: ^4.3.2+3
-  flutter_sound: ^7.4.12+1
-  path_provider: ^1.6.24
-  permission_handler: ^5.0.1+1
+  camera: ^0.10.5+4
+  tflite: ^1.1.2
+  image: ^4.0.17
+  provider: ^6.0.5
+  flutter_sound: ^9.2.13
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.0
 
 
 dev_dependencies:
